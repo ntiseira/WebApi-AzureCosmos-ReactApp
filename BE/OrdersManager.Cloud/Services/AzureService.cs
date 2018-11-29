@@ -7,27 +7,51 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OrdersManager.Cloud.Services
 {
-    public class AzureService : ICloudServices
+    public class AzureService : ICloudServices       
     {
+        private IDocumentDBConnection connAzureCosmos;
 
-        public void CreateOrderQueryAzureCosmos()
+        public AzureService(IDocumentDBConnection connAzureCosmos)
         {
+            this.connAzureCosmos = connAzureCosmos;
+        }
 
-            var client = new DocumentClient(new Uri(ConfigurationManager.AppSettings["endpoint"]), ConfigurationManager.AppSettings["authKey"]);
+        public async Task  CreateOrderQueryAzureCosmos (object entity)
+        {
+            var client = this.connAzureCosmos.GetConnection();
+            
+            /*PropertyInfo[] props = entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)*/;
 
-            var collectionLink = UriFactory.CreateDocumentCollectionUri("databaseId", "collectionId");
+           
+            Domain.Entities.Order test = new Domain.Entities.Order();
+            test.Id = 1;
+
+            await client.CreateDocumentAsync(
+                UriFactory.CreateDocumentCollectionUri("azuredbtestorders","test"), "prueba");
+
+
+            var collectionLink = UriFactory.CreateDocumentUri("azuredbtestorders", "test", "test");
+
+            await client.CreateDocumentAsync(collectionLink, "prueba");
+
+            //await client.CreateDocumentAsync(
+            //     UriFactory
+            //         .CreateDocumentCollectionUri(
+            //             "", ToDoItemsId),
+            //     item);
 
 
             SqlQuerySpec query = new SqlQuerySpec("SELECT * FROM Families f WHERE f.id = @familyId");
             query.Parameters = new SqlParameterCollection();
             query.Parameters.Add(new SqlParameter("@familyId", "AndersenFamily"));
 
-            client.CreateDocumentQuery(collectionLink, query);
+         //   client.CreateDocumentQuery(collectionLink, query);
             //client.ReplaceDocumentAsync() method used to replace existing document
         }
 

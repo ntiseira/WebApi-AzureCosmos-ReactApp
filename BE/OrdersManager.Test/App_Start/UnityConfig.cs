@@ -66,10 +66,15 @@ namespace OrdersManager.Test
 
             container.RegisterType(typeof(IRepository<>), typeof(Repository<>));
 
+            container.RegisterType<IDocumentDBConnection, DocumentDBConnection>();
 
             container.RegisterType<IOrderService, OrderService>();
 
             container.RegisterType<OrderController>();
+
+         
+
+            container.RegisterType(typeof(IDocumentDbRepository<>), typeof(DocumentDbRepository<>));
 
             GlobalConfiguration.Configuration.DependencyResolver = new Unity.AspNet.WebApi.UnityDependencyResolver(container);
         }

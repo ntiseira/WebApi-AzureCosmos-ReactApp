@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Web.Http.Results;
 using NUnit.Framework;
 using OrdersManager.Api.Controllers;
+using OrdersManager.Cloud;
+using OrdersManager.Cloud.Interfaces;
+using OrdersManager.Cloud.Services;
 using OrdersManager.Data.UnitOfWork;
 using OrdersManager.Domain.DTOs;
+using OrdersManager.Domain.Entities;
 using OrdersManager.Services;
 
 namespace OrdersManager.Test
@@ -13,25 +18,37 @@ namespace OrdersManager.Test
     public class OrderTest
     {
         [Test]
-        public void GetOrdersWithoutFilter()
+        public async Task GetOrdersWithoutFilter()
         {
+            var repo = UnityConfig.Resolve<IDocumentDbRepository<Order>>();
 
-            var orderController = UnityConfig.Resolve<OrderController>();
-
-            BaseCriteriaDTO criteria = new BaseCriteriaDTO
-            {
-                Filter = "",
-                OrderAsc = true,
-                OrderBy = "",
-                PageNumber = 1
-            };
-
-            var postResult = orderController.PostGetOrders(criteria);
-
-            var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
+            //var azureClient = new AzureService(conn);
 
 
-            Assert.IsTrue(listOrders.Content.TotalItems > 0);
+            var orderTest = new Order { Id = 1, TotalAmount = 200 };
+
+            repo.CreateItemAsync(orderTest).Wait();
+
+
+
+           //await azureClient.CreateOrderQueryAzureCosmos(orderTest);
+
+           // var orderController = UnityConfig.Resolve<OrderController>();
+
+           // BaseCriteriaDTO criteria = new BaseCriteriaDTO
+           // {
+           //     Filter = "",
+           //     OrderAsc = true,
+           //     OrderBy = "",
+           //     PageNumber = 1
+           // };
+
+           // var postResult = orderController.PostGetOrders(criteria);
+
+           // var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
+
+
+           // Assert.IsTrue(listOrders.Content.TotalItems > 0);
         }
 
 

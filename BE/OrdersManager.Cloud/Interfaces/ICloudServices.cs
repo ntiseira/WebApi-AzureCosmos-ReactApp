@@ -9,5 +9,6 @@ namespace OrdersManager.Cloud.Interfaces
    public interface ICloudServices : IDisposable
     {
 
+
     }
 }
