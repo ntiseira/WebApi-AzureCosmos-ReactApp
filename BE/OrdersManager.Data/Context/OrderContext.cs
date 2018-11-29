@@ -1,4 +1,5 @@
 ﻿using OrdersManager.Domain;
+using OrdersManager.Domain.Entities;
 using OrdersManager.Domain.Mapping;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OrdersManager.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.ModelConfiguration;

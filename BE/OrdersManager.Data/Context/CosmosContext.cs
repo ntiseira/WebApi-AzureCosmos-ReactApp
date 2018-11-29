@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OrdersManager.Cloud.Interfaces
+namespace OrdersManager.Data.Context
 {
-   public interface ICloudServices : IDisposable
+    class CosmosContext
     {
-
     }
 }

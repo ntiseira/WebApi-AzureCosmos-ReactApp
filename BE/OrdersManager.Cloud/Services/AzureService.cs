@@ -1,8 +1,7 @@
 ﻿using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using OrdersManager.Cloud.Interfaces;
-using Sandboxable.Microsoft.WindowsAzure.Storage;
-using Sandboxable.Microsoft.WindowsAzure.Storage.Blob;
+
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -11,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OrdersManager.Cloud
+namespace OrdersManager.Cloud.Services
 {
     public class AzureService : ICloudServices
     {
@@ -33,57 +32,7 @@ namespace OrdersManager.Cloud
         }
 
 
-        public async Task<bool> UploadFileAsync(string filePath, string fileName)
-        {
-            
-            CloudStorageAccount storageAccount = null;
-            CloudBlobContainer cloudBlobContainer = null;
-          
-            // Retrieve the connection string for use with the application. The storage connection string is stored in appsettings         
-            string storageConnectionString = ConfigurationManager.AppSettings["CloudBlobConnectionString"].ToString();
-            
-            //ContainterName
-            string containerName = ConfigurationManager.AppSettings["ContainterName"].ToString();
-
-            // Check whether the connection string can be parsed.
-            if (CloudStorageAccount.TryParse(storageConnectionString, out storageAccount))
-            {
-                try
-                {
-                    // Create the CloudBlobClient that represents the Blob storage endpoint for the storage account.
-                    CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
-
-                    cloudBlobContainer = cloudBlobClient.GetContainerReference(containerName);
-
-
-                    if (cloudBlobContainer.CreateIfNotExistsAsync().Result)
-                    {
-
-                        // Set the permissions so the blobs are public. 
-                        await cloudBlobContainer.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
-
-                    }
-
-                    CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(fileName);
-                                       
-                    await cloudBlockBlob.UploadFromFileAsync(filePath);
-                    
-                    return true;
-
-                }
-                catch (StorageException ex)
-                {
-                    Console.WriteLine("Error returned from the service: {0}", ex.Message);
-
-                    return false;
-
-                }               
-            }
-            else
-            {
-                throw new Exception("Error with connection string not found");
-            }
-        }
+    
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

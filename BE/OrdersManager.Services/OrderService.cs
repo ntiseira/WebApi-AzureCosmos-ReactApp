@@ -1,17 +1,15 @@
 ﻿using OrdersManager.Cloud.Interfaces;
 using OrdersManager.Data.Helper;
-using OrdersManager.Data.Repository.Base;
 using OrdersManager.Data.UnitOfWork;
-using OrdersManager.Domain;
 using OrdersManager.Domain.DTOs;
+using OrdersManager.Domain.Entities;
 using OrdersManager.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace OrdersManager.Services
 {
@@ -34,11 +32,7 @@ namespace OrdersManager.Services
 
         }
 
-        public  Task<bool> UploadImageContainer(string filePath, string fileName)
-        {
-            return Task.FromResult(cloudServices.UploadFileAsync(filePath,fileName).Result);
-        }
-
+      
        
 
         public void EditOrderDetail(OrderDetailDTO orderDetailDto)
@@ -51,7 +45,7 @@ namespace OrdersManager.Services
             orderDetailEntity.Discount = orderDetailDto.Discount;
 
 
-            orderDetailsRepository.Update(orderDetailEntity);
+            //orderDetailsRepository.Update(orderDetailEntity);
         }
 
 
@@ -92,7 +86,7 @@ namespace OrdersManager.Services
             {
                 Id = m.Id,
                 Created_At = m.Created_At,
-                OrderCustomer = m.OrderCustomer,
+             //   OrderCustomer = m.OrderCustomer,
                 Details = m.OrdersDetails.Select(a => new OrderDetailDTO { Id = a.Id, OrderId= m.Id,  Discount = a.Discount,ProductId = a.ProductId, ProductName = a.ProductSold.Name, Quantity = a.Quantity }).ToList(),
                 shipAdress = m.ShipAdress,
                 shipCity = m.ShipCity,

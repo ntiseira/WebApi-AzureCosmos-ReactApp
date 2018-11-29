@@ -1,6 +1,7 @@
 using CommonServiceLocator;
 using OrdersManager.Cloud;
 using OrdersManager.Cloud.Interfaces;
+using OrdersManager.Cloud.Services;
 using OrdersManager.Data.Repository.Base;
 using OrdersManager.Data.UnitOfWork;
 using OrdersManager.Services;

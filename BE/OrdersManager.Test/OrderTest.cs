@@ -6,44 +6,142 @@ using OrdersManager.Api.Controllers;
 using OrdersManager.Data.UnitOfWork;
 using OrdersManager.Domain.DTOs;
 using OrdersManager.Services;
-using System.IO;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net;
 
 namespace OrdersManager.Test
 {
     [TestFixture]
-    public class OrderTest 
+    public class OrderTest
     {
-      
+        [Test]
+        public void GetOrdersWithoutFilter()
+        {
+
+            var orderController = UnityConfig.Resolve<OrderController>();
+
+            BaseCriteriaDTO criteria = new BaseCriteriaDTO
+            {
+                Filter = "",
+                OrderAsc = true,
+                OrderBy = "",
+                PageNumber = 1
+            };
+
+            var postResult = orderController.PostGetOrders(criteria);
+
+            var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
+
+
+            Assert.IsTrue(listOrders.Content.TotalItems > 0);
+        }
+
 
 
         [Test]
-        public void OrderPostDataBlob()
+        public void GetOrdersFilterShipCity()
         {
+
             var orderController = UnityConfig.Resolve<OrderController>();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "");
 
-            HttpClient client = new HttpClient();
+            BaseCriteriaDTO criteria = new BaseCriteriaDTO
+            {
+                Filter = "Buenos Aires",
+                OrderAsc = true,
+                OrderBy = "",
+                PageNumber = 1
+            };
 
-            System.Net.Http.MultipartFormDataContent formDataContent = new System.Net.Http.MultipartFormDataContent();
-            formDataContent.Add(new System.Net.Http.StringContent("Hello World!"), name: "greeting");
-            System.Net.Http.StreamContent file1 = new System.Net.Http.StreamContent(File.OpenRead(@"C:\Images\riverplate.jpg"));
-            file1.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
-            file1.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
-            file1.Headers.ContentDisposition.FileName = "riverplate.jpg";
-            formDataContent.Add(file1);
+            var postResult = orderController.PostGetOrders(criteria);
 
-            request.Content = formDataContent;
-            orderController.Request = request;
+            var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
 
-            HttpResponseMessage response = orderController.PostFormData().Result;
-                       
-            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+
+            Assert.IsTrue(listOrders.Content.TotalItems > 0);
         }
 
-        
+
+        [Test]
+        public void GetOrdersOrderByShipAdress()
+        {
+
+            var orderController = UnityConfig.Resolve<OrderController>();
+
+            BaseCriteriaDTO criteria = new BaseCriteriaDTO
+            {
+                Filter = "",
+                OrderAsc = true,
+                OrderBy = "shipAdress",
+                PageNumber = 1
+            };
+
+            var postResult = orderController.PostGetOrders(criteria);
+
+            var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
+
+
+            Assert.IsTrue(listOrders.Content.TotalItems > 0);
+        }
+
+
+
+        [Test]
+        public void EditOrder()
+        {
+
+
+            var orderController = UnityConfig.Resolve<OrderController>();
+
+            BaseCriteriaDTO criteria = new BaseCriteriaDTO
+            {
+                Filter = "",
+                OrderAsc = true,
+                OrderBy = "",
+                PageNumber = 1
+            };
+
+            var postResult = orderController.PostGetOrders(criteria);
+
+            var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
+
+            //Modify Entity
+            var entity = listOrders.Content.CurrentPageItems[0];
+            entity.shipAdress = "sarasa";
+
+            entity.Details[0].Quantity = 10000;
+            entity.Details[0].Discount = 10000;
+
+            // orderController.PostEditOrder(entity);
+
+            UnityConfig.Resolve<IUnitOfWork>().Commit();
+
+            //  unitOfWorkSession.Commit();
+            //Assert.IsTrue(unitOfWorkSession.Commit()));
+        }
+
+
+
+        [Test]
+        public void GetOrderDetails()
+        {
+
+            var orderController = UnityConfig.Resolve<OrderController>();
+
+            BaseCriteriaDTO criteria = new BaseCriteriaDTO
+            {
+                IdOrder = 1,
+                Filter = "",
+                OrderAsc = true,
+                OrderBy = "",
+                PageNumber = 1
+            };
+
+            var postResult = orderController.PostGetOrdersDetails(criteria);
+
+            var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDetailDTO>>;
+
+
+            Assert.IsTrue(listOrders.Content.TotalItems > 0);
+        }
+
 
 
 
