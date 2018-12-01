@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Web.Http.Results;
 using NUnit.Framework;
@@ -20,12 +21,12 @@ namespace OrdersManager.Test
         [Test]
         public async Task GetOrdersWithoutFilter()
         {
-            var repo = UnityConfig.Resolve<IDocumentDbRepository<Order>>();
+            var repo = UnityConfig.Resolve<IDocumentDbRepository<EntityCloud>>();
 
             //var azureClient = new AzureService(conn);
 
 
-            var orderTest = new Order { Id = 1, TotalAmount = 200 };
+            var orderTest = new EntityCloud { Id = "1"  };
 
             repo.CreateItemAsync(orderTest).Wait();
 
@@ -51,6 +52,72 @@ namespace OrdersManager.Test
            // Assert.IsTrue(listOrders.Content.TotalItems > 0);
         }
 
+        private Expression<Func<OrderDetail, object>>[] GetOrderDetailsByExpressions_Orders(string orderBy)
+        {
+            var result = new List<Expression<Func<OrderDetail, object>>>();
+
+            switch (orderBy)
+            {
+                case nameof(OrderDetailDTO.Id):
+                result.Add((OrderDetail x) => x.Id); break;
+                case nameof(OrderDetailDTO.ProductName):
+                result.Add((OrderDetail x) => x.ProductSold.Name); break;
+                case nameof(OrderDetailDTO.Quantity):
+                result.Add((OrderDetail x) => x.Quantity); break;
+                case nameof(OrderDetailDTO.Discount):
+                result.Add((OrderDetail x) => x.Discount);
+                break;//this is considered by default
+            }
+
+            result.Add((OrderDetail x) => x.OrderId);
+
+            return result.ToArray();
+        }
+
+        [Test]
+        public void CreateDocumentAzureCosmos()
+        {
+            var repo = UnityConfig.Resolve<IDocumentDbRepository<EntityCloud>>();
+
+            //var azureClient = new AzureService(conn);
+
+
+            var orderTest = new EntityCloud { Id = "8" };
+
+
+            Expression<Func<EntityCloud, bool>> expression = x => x.Id == orderTest.Id;
+            
+            
+
+
+            var result = repo.ExecuteSimpleQuery("azuredbtestorders3", "test3", null).Result;
+
+            List<EntityCloud> orders = new List<EntityCloud>();
+            orders = result;
+
+            var resu =  repo.CreateItemAsync(orderTest).Result;
+
+            
+
+            //await azureClient.CreateOrderQueryAzureCosmos(orderTest);
+
+            // var orderController = UnityConfig.Resolve<OrderController>();
+
+            // BaseCriteriaDTO criteria = new BaseCriteriaDTO
+            // {
+            //     Filter = "",
+            //     OrderAsc = true,
+            //     OrderBy = "",
+            //     PageNumber = 1
+            // };
+
+            // var postResult = orderController.PostGetOrders(criteria);
+
+            // var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
+
+
+             Assert.AreEqual(resu.Id , orderTest.Id);
+        }
 
 
         [Test]
@@ -136,28 +203,7 @@ namespace OrdersManager.Test
 
 
 
-        [Test]
-        public void GetOrderDetails()
-        {
-
-            var orderController = UnityConfig.Resolve<OrderController>();
-
-            BaseCriteriaDTO criteria = new BaseCriteriaDTO
-            {
-                IdOrder = 1,
-                Filter = "",
-                OrderAsc = true,
-                OrderBy = "",
-                PageNumber = 1
-            };
-
-            var postResult = orderController.PostGetOrdersDetails(criteria);
-
-            var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDetailDTO>>;
-
-
-            Assert.IsTrue(listOrders.Content.TotalItems > 0);
-        }
+      
 
 
 

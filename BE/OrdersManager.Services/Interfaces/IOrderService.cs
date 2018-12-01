@@ -29,7 +29,7 @@ namespace OrdersManager.Services.Interfaces
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        PagedListDTO<OrderDetailDTO> GetOrdersDetails(BaseCriteriaDTO criteria);
+        //PagedListDTO<OrderDetailDTO> GetOrdersDetails(BaseCriteriaDTO criteria);
 
 
         /// <summary>

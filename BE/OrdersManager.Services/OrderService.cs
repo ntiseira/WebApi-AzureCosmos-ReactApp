@@ -17,139 +17,89 @@ namespace OrdersManager.Services
     {
 
         private readonly ICloudServices cloudServices;
-      
+        private IDocumentDbRepository<Order> repositoryOrders;
+
         /// <inheritdoc />
         public OrderService(
               ICloudServices cloudServices
+            ,IDocumentDbRepository<Order> repositoryOrders
             )
         {
             this.cloudServices = cloudServices;
+            this.repositoryOrders = repositoryOrders;
 
         }
+                
 
-        public void EditOrderDetail(OrderDetailDTO orderDetailEntity)
+        public void EditOrderDetail(OrderDetailDTO orderDetailDto)
         {
-            throw new NotImplementedException();
+            //Get document
+            var orderEntity = repositoryOrders.GetItemAsync(orderDetailDto.OrderId.ToString()).Result;
+
+            //Modify properties of order details
+           foreach(var item in orderEntity.OrdersDetails)
+           {
+                //Ask for id of order detail
+                if (item.Id == orderDetailDto.Id.ToString())
+                {
+                    item.Quantity = orderDetailDto.Quantity;
+                    item.Discount = orderDetailDto.Discount;
+                }
+           }
+           
+            repositoryOrders.UpdateItemAsync(orderEntity.Id, orderEntity);
         }
+
 
         public PagedListDTO<OrderDTO> GetOrders(BaseCriteriaDTO criteria)
         {
-            throw new NotImplementedException();
+            //PageSize
+            int pageSize = Convert.ToInt32(ConfigurationManager.AppSettings["pageSize"].ToString());
+
+            //filter (expression in DB)
+            Expression<Func<Order, bool>> filterExpression = x => x.Id  != "0";
+
+            if (!string.IsNullOrWhiteSpace(criteria.Filter))
+
+                filterExpression = filterExpression.Join(
+                         x =>
+                         x.OrderCustomer.ContactName.ToUpper().Contains(criteria.Filter.ToUpper()) ||
+                         x.ShipAdress.ToUpper().Contains(criteria.Filter.ToUpper())
+                        || x.ShipCity.ToUpper().Contains(criteria.Filter.ToUpper())
+                        || x.ShipCountry.ToUpper().Contains(criteria.Filter.ToUpper())
+                        || x.ShipPostalCode.ToUpper().Contains(criteria.Filter.ToUpper())
+                        || x.TotalAmount.ToString().Contains(criteria.Filter.ToString())
+                        );
+
+            //order by
+            Expression<Func<Order, object>>[] orderByExpressions = this.GetOrderByExpressions_Orders(criteria.OrderBy);
+
+           
+            Tuple<IQueryable<Order>,int> q = repositoryOrders.GetAllAsync(criteria.PageNumber,
+                pageSize, filterExpression, criteria.OrderAsc, orderByExpressions).Result;
+
+            //get total entities
+            int totalItems = q.Item2;
+
+
+            //parse to DTO
+            List<OrderDTO> items = q.Item1.ToList().Select(m => new OrderDTO
+            {
+                Id = Convert.ToInt32(m.Id),
+                Created_At = m.Created_At,
+                //OrderCustomer = m.OrderCustomer,
+                Details = m.OrdersDetails.Select(a => new OrderDetailDTO { Id = Convert.ToInt32(a.Id), OrderId = Convert.ToInt32(m.Id), Discount = a.Discount, ProductId = a.ProductId, ProductName = a.ProductSold.Name, Quantity = a.Quantity }).ToList(),
+                shipAdress = m.ShipAdress,
+                shipCity = m.ShipCity,
+                shipCountry = m.ShipCountry,
+                shipPostalCode = m.ShipPostalCode,
+                TotalAmount = m.TotalAmount
+            }).ToList();
+
+            return new PagedListDTO<OrderDTO>(totalItems, pageSize, items, criteria.PageNumber);
         }
 
-        public PagedListDTO<OrderDetailDTO> GetOrdersDetails(BaseCriteriaDTO criteria)
-        {
-            throw new NotImplementedException();
-        }
 
-
-
-
-        //public void EditOrderDetail(OrderDetailDTO orderDetailDto)
-        //{
-        //    //orderDetailsRepository = unitOfWork.GetRepository<OrderDetail>();
-
-        //    //var orderDetailEntity = orderDetailsRepository.Get(orderDetailDto.Id);
-
-        //    //orderDetailEntity.Quantity = orderDetailDto.Quantity;
-        //    //orderDetailEntity.Discount = orderDetailDto.Discount;
-
-
-        //    //orderDetailsRepository.Update(orderDetailEntity);
-        //}
-
-
-        //public PagedListDTO<OrderDTO> GetOrders(BaseCriteriaDTO criteria)
-        //{
-
-        //    //orderRepository = unitOfWork.GetRepository<Order>();
-
-        //    ////PageSize
-        //    //int pageSize = Convert.ToInt32(ConfigurationManager.AppSettings["pageSize"].ToString());
-
-        //    ////filter (expression in DB)
-        //    //Expression<Func<Order, bool>> filterExpression = x =>x.Id > 0;
-
-        //    //if (!string.IsNullOrWhiteSpace(criteria.Filter))
-
-        //    //    filterExpression = filterExpression.Join(
-        //    //             x =>
-        //    //             x.OrderCustomer.ContactName.ToUpper().Contains(criteria.Filter.ToUpper()) ||
-        //    //             x.ShipAdress.ToUpper().Contains(criteria.Filter.ToUpper())
-        //    //            || x.ShipCity.ToUpper().Contains(criteria.Filter.ToUpper())
-        //    //            || x.ShipCountry.ToUpper().Contains(criteria.Filter.ToUpper())
-        //    //            || x.ShipPostalCode.ToUpper().Contains(criteria.Filter.ToUpper())
-        //    //            || x.TotalAmount.ToString().Contains(criteria.Filter.ToString())
-        //    //            );
-
-        //    ////order by
-        //    //Expression<Func<Order, object>>[] orderByExpressions = this.GetOrderByExpressions_Orders(criteria.OrderBy);
-
-        //    ////get entities
-        //    //int totalItems;
-
-        //    //IQueryable<Order> q = orderRepository.GetAll(out totalItems, criteria.PageNumber,
-        //    //    pageSize, filterExpression, criteria.OrderAsc, new string[] { "OrderCustomer", "OrdersDetails", "OrdersDetails.ProductSold" }, orderByExpressions);
-
-        //    ////parse to DTO
-        //    //List<OrderDTO> items = q.ToList().Select(m => new OrderDTO
-        //    //{
-        //    //    Id = m.Id,
-        //    //    Created_At = m.Created_At,
-        //    // //   OrderCustomer = m.OrderCustomer,
-        //    //    Details = m.OrdersDetails.Select(a => new OrderDetailDTO { Id = a.Id, OrderId= m.Id,  Discount = a.Discount,ProductId = a.ProductId, ProductName = a.ProductSold.Name, Quantity = a.Quantity }).ToList(),
-        //    //    shipAdress = m.ShipAdress,
-        //    //    shipCity = m.ShipCity,
-        //    //    shipCountry= m.ShipCountry,
-        //    //     shipPostalCode= m.ShipPostalCode,
-        //    //    TotalAmount= m.TotalAmount                
-        //    //}).ToList();
-
-        //    return new PagedListDTO<OrderDTO>(totalItems, pageSize, items, criteria.PageNumber);
-        //}
-
-        //public PagedListDTO<OrderDetailDTO> GetOrdersDetails(BaseCriteriaDTO criteria)
-        //{
-
-        //    orderDetailsRepository = unitOfWork.GetRepository<OrderDetail>();
-
-        //    //PageSize
-        //    int pageSize = Convert.ToInt32(ConfigurationManager.AppSettings["pageSize"].ToString());
-
-        //    //filter (expression in DB)
-        //    Expression<Func<OrderDetail, bool>> filterExpression = x =>x.Id == criteria.IdOrder;
-
-        //    if (!string.IsNullOrWhiteSpace(criteria.Filter))
-
-        //        filterExpression = filterExpression.Join(
-        //                 x =>
-        //                 x.ProductSold.Name.ToUpper().Contains(criteria.Filter.ToUpper()) ||
-        //                 x.Quantity.ToString().ToUpper().Contains(criteria.Filter.ToUpper())
-        //                || x.Discount.ToString().ToUpper().Contains(criteria.Filter.ToUpper())                        
-        //                );
-
-        //    //order by
-        //    Expression<Func<OrderDetail, object>>[] orderByExpressions = this.GetOrderDetailsByExpressions_Orders(criteria.OrderBy);
-
-        //    //get entities
-        //    int totalItems;
-
-        //    IQueryable<OrderDetail> q = orderDetailsRepository.GetAll(out totalItems, criteria.PageNumber,
-        //        pageSize, filterExpression, criteria.OrderAsc, new string[] { "ProductSold" }, orderByExpressions);
-
-        //    var listOrderDetails = q.ToList();
-
-        //    //parse to DTO
-        //    List<OrderDetailDTO> items = q.ToList().Select(m => new OrderDetailDTO
-        //    {
-        //        Id = m.Id,
-        //        ProductName = m.ProductSold.Name,
-        //        Quantity = m.Quantity,                
-        //        Discount= m.Discount
-        //    }).ToList();
-
-        //    return new PagedListDTO<OrderDetailDTO>(totalItems, pageSize, items, criteria.PageNumber);
-        //}
 
 
 

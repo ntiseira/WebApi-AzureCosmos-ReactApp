@@ -10,6 +10,6 @@ namespace OrdersManager.Domain.Base
     public abstract class BaseEntity : IEntity
     {
         [JsonProperty(PropertyName = "id")]
-        public virtual int Id { get; set; }
+        public virtual string Id { get; set; }
     }
 }

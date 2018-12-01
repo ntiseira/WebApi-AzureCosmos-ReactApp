@@ -10,13 +10,13 @@ namespace OrdersManager.Domain.Entities
 {
     public class Product : BaseEntity
     {
-        [JsonProperty(PropertyName = "Name")]
+        //[JsonProperty(PropertyName = "Name")]
         public string Name { get; set; }
 
-        [JsonProperty(PropertyName = "Unitprice")]
+        //[JsonProperty(PropertyName = "Unitprice")]
         public decimal Unitprice { get; set; }
 
-        [JsonProperty(PropertyName = "UnitInStock")]
+        //[JsonProperty(PropertyName = "UnitInStock")]
         public int UnitInStock { get; set; }
 
     }

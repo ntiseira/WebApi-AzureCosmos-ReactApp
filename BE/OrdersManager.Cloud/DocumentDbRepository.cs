@@ -2,11 +2,14 @@
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
 using OrdersManager.Cloud.Interfaces;
+using OrdersManager.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -65,30 +68,145 @@ namespace OrdersManager.Cloud
         }
 
         public async Task<Document> CreateItemAsync(T item)
-        {
-            //client = new DocumentClient(new Uri(ConfigurationManager.AppSettings["endpoint"]), ConfigurationManager.AppSettings["authKey"]);
+        { 
+            Document docResponse = new Document();
+ 
+            try
+            {
+                docResponse =  await GetClient().ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, item.ToString()));
+            }
+            catch (DocumentClientException de)
+            {
+                if (de.StatusCode == HttpStatusCode.NotFound)
+                {
+                    docResponse = await GetClient().CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), item);
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
-
-            var doc = GetClient().CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), "prueba").Result;
-
-            return doc;
+            return docResponse;
         }
 
-        public   async Task<Document> UpdateItemAsync(string id, T item)
+
+        public IQueryable<T> GetAll()
+        {
+            var query = GetClient().CreateDocumentQuery<T>(
+                  UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions()
+                  {
+                      EnableCrossPartitionQuery = true
+                  });
+
+
+            return query;
+        }
+
+    
+
+        public async Task<Tuple<IQueryable<T>,int>> GetAllAsync(int pageNumber, int pageSize, Expression<Func<T, bool>> filter = null, bool orderAsc = false, 
+            params Expression<Func<T, object>>[] orderByExpressions)
+        {
+            IQueryable<T> q = GetAll();
+                 
+            //Add filters
+            if (filter != null)
+                q = q.Where(filter);
+
+            //Get count
+            int totalItems = q.Count();
+
+            //Add order by desc or asc
+            SortOrder sortOrder = SortOrder.Descending;
+            if (orderAsc)
+                sortOrder = SortOrder.Ascending;
+
+            //Add order by expressions
+            foreach (var itemOrder in orderByExpressions)
+            {
+               
+                q = ObjectSort(q, itemOrder, sortOrder);
+            }
+
+            q = q.Skip(pageSize * (pageNumber - 1)).Take(pageSize);
+
+
+            var query = GetClient().CreateDocumentQuery<T>(
+                  UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions()
+                  {
+                      MaxItemCount = pageSize,
+                      EnableCrossPartitionQuery = true
+                  }).AsDocumentQuery();
+
+
+            var results = new List<T>();
+            while (query.HasMoreResults)
+            {
+                results.AddRange(await query.ExecuteNextAsync<T>());
+            }
+
+            //Create response
+            Tuple<IQueryable<T>, int> res = new Tuple<IQueryable<T>, int>(q, totalItems);
+
+            return res;
+        }
+
+
+
+        public async Task<List<T>> ExecuteSimpleQuery(string databaseName, string collectionName, Expression<Func<T, bool>> expression)
+        {
+            // Set some common query options
+          FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1 };
+            List<T> queryResult;
+            // Run a simple query via LINQ. DocumentDB indexes all properties, so queries can be completed efficiently and with low latency.
+
+            if (expression != null)
+            {
+                queryResult = GetClient().CreateDocumentQuery<T>(
+                    UriFactory.CreateDocumentCollectionUri(databaseName, collectionName), queryOptions).Where(expression).ToList();
+            }
+            else
+            {
+              
+
+               var query = GetClient().CreateDocumentQuery<T>(
+                  UriFactory.CreateDocumentCollectionUri(databaseName, collectionName), new FeedOptions()
+                  {
+                      EnableCrossPartitionQuery = true
+                  }).AsDocumentQuery();
+
+
+                var results = new List<T>();
+                while (query.HasMoreResults)
+                {
+                     results.AddRange(await query.ExecuteNextAsync<T>());
+                }
+
+                queryResult = results;
+            }
+
+            return queryResult;
+
+        }
+
+
+
+        public async Task<Document> UpdateItemAsync(string id, T item)
         {
             return await client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id), item);
         }
 
-        public   async Task DeleteItemAsync(string id)
+        public async Task DeleteItemAsync(string id)
         {
             await client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id));
         }
 
-        public   void Initialize()
+        public void Initialize()
         {
             client = new DocumentClient(new Uri(ConfigurationManager.AppSettings["endpoint"]), ConfigurationManager.AppSettings["authKey"]);
-          CreateDatabaseIfNotExistsAsync().Wait();
-           CreateCollectionIfNotExistsAsync().Wait();
+        //  CreateDatabaseIfNotExistsAsync().Wait();
+        //   CreateCollectionIfNotExistsAsync().Wait();
         }
 
         private   async Task CreateDatabaseIfNotExistsAsync()
@@ -131,6 +249,43 @@ namespace OrdersManager.Cloud
                 }
             }
         }
+
+
+        #region Private Methods
+
+        private IOrderedQueryable<T> ObjectSort(IQueryable<T> entities, Expression<Func<T, object>> expression,
+      SortOrder order = SortOrder.Ascending)
+        {
+            UnaryExpression unaryExpression = expression.Body as UnaryExpression;
+            if (unaryExpression != null)
+            {
+                var propertyExpression = (MemberExpression)unaryExpression.Operand;
+                var parameters = expression.Parameters;
+
+                if (propertyExpression.Type == typeof(DateTime))
+                {
+                    var newExpression = Expression.Lambda<Func<T, DateTime>>(propertyExpression, parameters);
+                    return order == SortOrder.Ascending ? entities.OrderBy(newExpression) : entities.OrderByDescending(newExpression);
+                }
+
+                if (propertyExpression.Type == typeof(int))
+                {
+                    var newExpression = Expression.Lambda<Func<T, int>>(propertyExpression, parameters);
+                    return order == SortOrder.Ascending ? entities.OrderBy(newExpression) : entities.OrderByDescending(newExpression);
+                }
+
+                if (propertyExpression.Type == typeof(decimal))
+                {
+                    var newExpression = Expression.Lambda<Func<T, decimal>>(propertyExpression, parameters);
+                    return order == SortOrder.Ascending ? entities.OrderBy(newExpression) : entities.OrderByDescending(newExpression);
+                }
+
+                throw new NotSupportedException("Object type resolution not implemented for this type");
+            }
+            return entities.OrderBy(expression);
+        }
+
+        #endregion
     }
 }
  

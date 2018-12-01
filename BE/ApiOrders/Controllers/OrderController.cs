@@ -43,15 +43,7 @@ namespace OrdersManager.Api.Controllers
             return Ok(result);
         }
 
-        [Route("Order/PostGetOrdersDetails")]
-        public IHttpActionResult PostGetOrdersDetails([FromBody]BaseCriteriaDTO criteria)
-        {
-            if (criteria == null)
-                return BadRequest();
-            PagedListDTO<OrderDetailDTO> result = orderService.GetOrdersDetails(criteria);
-
-            return Ok(result);
-        }
+      
 
 
         [Route("Order/PostEditOrderDetail")]

@@ -11,21 +11,21 @@ namespace OrdersManager.Domain.Entities
    public class OrderDetail: BaseEntity
     {
 
-        [JsonProperty(PropertyName = "ProductId")]
+        //[JsonProperty(PropertyName = "ProductId")]
 
         public int ProductId { get; set; }
 
 
-        [JsonProperty(PropertyName = "OrderId")]
+        //[JsonProperty(PropertyName = "OrderId")]
         public int OrderId { get; set; }
 
-        [JsonProperty(PropertyName = "Quantity")]
+        //[JsonProperty(PropertyName = "Quantity")]
         public int Quantity { get; set; }
 
-        [JsonProperty(PropertyName = "Discount")]
+        //[JsonProperty(PropertyName = "Discount")]
         public int Discount { get; set; }
 
-        [JsonProperty(PropertyName = "ProductSold")]
+        //[JsonProperty(PropertyName = "ProductSold")]
         public Product ProductSold { get; set; }
     }
 }

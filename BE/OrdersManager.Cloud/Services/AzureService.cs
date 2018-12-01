@@ -30,7 +30,7 @@ namespace OrdersManager.Cloud.Services
 
            
             Domain.Entities.Order test = new Domain.Entities.Order();
-            test.Id = 1;
+            //test.Id = 1;
 
             await client.CreateDocumentAsync(
                 UriFactory.CreateDocumentCollectionUri("azuredbtestorders","test"), "prueba");

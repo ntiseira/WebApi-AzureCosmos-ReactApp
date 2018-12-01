@@ -8,6 +8,6 @@ namespace OrdersManager.Domain.Base
 {
     public interface IEntity
     {
-        int Id { get; set; }
+        string Id { get; set; }
     }
 }

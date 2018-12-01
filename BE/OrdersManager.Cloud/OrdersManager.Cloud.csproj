@@ -85,7 +85,6 @@
     <Compile Include="DocumentDbRepository.cs" />
     <Compile Include="Interfaces\IDocumentDbRepository.cs" />
     <Compile Include="Services\AzureService.cs" />
-    <Compile Include="CosmosDb.cs" />
     <Compile Include="DocumentDBConnection.cs" />
     <Compile Include="Interfaces\ICloudServices.cs" />
     <Compile Include="Interfaces\IDocumentDBConnection.cs" />

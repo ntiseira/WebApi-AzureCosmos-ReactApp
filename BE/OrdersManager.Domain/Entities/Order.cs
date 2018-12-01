@@ -10,33 +10,44 @@ namespace OrdersManager.Domain.Entities
 {
    public class Order : BaseEntity
     {
-        [JsonProperty(PropertyName = "OrderCustomer")]
+
+        //public Order()
+        //{
+        //    OrdersDetails = new List<OrderDetail>();
+        //    OrderCustomer = new Customer
+        //}
+
+        //[JsonProperty(PropertyName = "OrderCustomer")]
         public Customer OrderCustomer { get; set; }
         
-        [JsonProperty(PropertyName = "OrdersDetails")]
-        public List<OrderDetail> OrdersDetails { get; set; }
+        //[JsonProperty(PropertyName = "OrdersDetails")]
+        public  OrderDetail[] OrdersDetails { get; set; }
 
-        [JsonProperty(PropertyName = "CustomerId")]
+        //[JsonProperty(PropertyName = "CustomerId")]
         public int CustomerId { get; set; }
 
-        [JsonProperty(PropertyName = "Created_At")]
+        //[JsonProperty(PropertyName = "Created_At")]
         public DateTime  Created_At { get; set; }
 
-        [JsonProperty(PropertyName = "ShipAdress")]
+        //[JsonProperty(PropertyName = "ShipAdress")]
         public string ShipAdress { get; set; }
 
-        [JsonProperty(PropertyName = "ShipCity")]
+        //[JsonProperty(PropertyName = "ShipCity")]
         public string ShipCity { get; set; }
 
-        [JsonProperty(PropertyName = "ShipPostalCode")]
+      //  [JsonProperty(PropertyName = "ShipPostalCode")]
         public string ShipPostalCode { get; set; }
 
-        [JsonProperty(PropertyName = "ShipCountry")]
+       // [JsonProperty(PropertyName = "ShipCountry")]
         public string ShipCountry { get; set; }
 
-        [JsonProperty(PropertyName = "TotalAmount")]
+     //   [JsonProperty(PropertyName = "TotalAmount")]
         public decimal TotalAmount { get; set; }
 
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
 
 
     }

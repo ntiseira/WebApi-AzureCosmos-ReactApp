@@ -17,7 +17,7 @@ namespace OrdersManager.Common
                 JToken.Parse(s);
                 return true;
             }
-            catch (JsonReaderException ex)
+            catch (JsonReaderException)
             {               
                 return false;
             }
