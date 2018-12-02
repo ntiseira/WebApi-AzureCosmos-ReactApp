@@ -147,6 +147,7 @@ namespace OrdersManager.Cloud
 
             while (query.HasMoreResults)
             {
+#warning review here , the counter
                 if (count == 0)
                 {
                     results.AddRange(await query.ExecuteNextAsync<T>());
