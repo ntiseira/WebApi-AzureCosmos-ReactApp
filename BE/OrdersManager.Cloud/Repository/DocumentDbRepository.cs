@@ -30,6 +30,15 @@ namespace OrdersManager.Cloud
             return client;
         }
 
+
+        public static DocumentClient GetClientCreation()
+        {
+            if (client == null)
+                InitializeCreation();
+
+            return client;
+        }
+
         public   async Task<T> GetItemAsync(string id)
         {
             try
@@ -73,13 +82,13 @@ namespace OrdersManager.Cloud
            
             try
             {
-                docResponse = await GetClient().ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id));
+                docResponse = await GetClientCreation().ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id));
             }
             catch (DocumentClientException de)
             {
                 if (de.StatusCode == HttpStatusCode.NotFound)
                 {
-                    docResponse = await GetClient().CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), item);
+                    docResponse = await GetClientCreation().CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), item);
                 }
                 else
                 {
@@ -112,50 +121,63 @@ namespace OrdersManager.Cloud
 
     
 
-        public async Task<Tuple<IQueryable<T>,int>> GetAllAsync(int pageNumber, int pageSize, Expression<Func<T, bool>> filter = null, bool orderAsc = false, 
+        public async Task<Tuple<List<T>,int>> GetAllAsync(int pageNumber, int pageSize, Expression<Func<T, bool>> filter = null, bool orderAsc = false, 
             params Expression<Func<T, object>>[] orderByExpressions)
         {
-            IQueryable<T> q = GetAll();
-                 
-            //Add filters
-            if (filter != null)
-                q = q.Where(filter);
-
-            //Get count
-            int totalItems = q.Count();
-
-            //Add order by desc or asc
-            SortOrder sortOrder = SortOrder.Descending;
-            if (orderAsc)
-                sortOrder = SortOrder.Ascending;
-
-            //Add order by expressions
-            foreach (var itemOrder in orderByExpressions)
-            {               
-                q = ObjectSort(q, itemOrder, sortOrder);
-            }
-
-
-           // q.Skip(pageSize * (pageNumber - 1)).Take(pageSize);
-
-            //q = q.Take(pageSize);
-
-            var results = new List<T>();
-          
-            var query = q.AsDocumentQuery();
-            int count = pageNumber - 1;
-
-            while (query.HasMoreResults)
-            {
-#warning review here , the counter
-                if (count == 0)
-                {
-                    results.AddRange(await query.ExecuteNextAsync<T>());
-                }
-            }
-
             //Create response
-            Tuple<IQueryable<T>, int> res = new Tuple<IQueryable<T>, int>(q, totalItems);
+            Tuple<List<T>, int> res;
+
+            try
+            {
+                IQueryable<T> q = GetAll();
+
+                //Add filters
+                if (filter != null)
+                    q = q.Where(filter);
+
+                //Get count
+                int totalItems = q.Count();
+
+                //Add order by desc or asc
+                SortOrder sortOrder = SortOrder.Descending;
+                if (orderAsc)
+                    sortOrder = SortOrder.Ascending;
+
+                //Add order by expressions
+                foreach (var itemOrder in orderByExpressions)
+                {
+                    q = ObjectSort(q, itemOrder, sortOrder);
+                }
+
+                var results = new List<T>();
+
+                var query = q.AsDocumentQuery();
+                int count = pageNumber - 1;
+                bool flag = false;
+
+                while (query.HasMoreResults && !flag)
+                {
+
+                    if (count == 0)
+                    {
+                        results.AddRange(await query.ExecuteNextAsync<T>());
+                        flag = true;
+                    }
+                    else
+                    {
+                        await query.ExecuteNextAsync<T>();
+                    }
+                    count--;
+
+                }
+
+                //Create response
+                res = new Tuple<List<T>, int>(results, totalItems);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
 
             return res;
         }
@@ -211,6 +233,11 @@ namespace OrdersManager.Cloud
         }
 
         public static void Initialize()
+        {
+            client = new DocumentClient(new Uri(ConfigurationManager.AppSettings["endpoint"]), ConfigurationManager.AppSettings["authKey"]);         
+        }
+
+        public static void InitializeCreation()
         {
             client = new DocumentClient(new Uri(ConfigurationManager.AppSettings["endpoint"]), ConfigurationManager.AppSettings["authKey"]);
             CreateDatabaseIfNotExistsAsync().Wait();

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Linq.Expressions;
-
+using System.Threading.Tasks;
 
 namespace OrdersManager.Services
 {
@@ -30,27 +30,27 @@ namespace OrdersManager.Services
         }
                 
 
-        public void EditOrderDetail(OrderDetailDTO orderDetailDto)
+        public async Task EditOrderDetail(OrderDetailDTO orderDetailDto)
         {
             //Get document
             var orderEntity = repositoryOrders.GetItemAsync(orderDetailDto.OrderId.ToString()).Result;
 
             //Modify properties of order details
            foreach(var item in orderEntity.OrdersDetails)
-           {
+           {                
                 //Ask for id of order detail
-                if (item.OrderDetailId == orderDetailDto.Id)
+                if (item!= null && item.OrderDetailId == orderDetailDto.Id)
                 {
                     item.Quantity = orderDetailDto.Quantity;
                     item.Discount = orderDetailDto.Discount;
                 }
            }
            
-            repositoryOrders.UpdateItemAsync(orderEntity.Id, orderEntity);
+            await repositoryOrders.UpdateItemAsync(orderEntity.Id, orderEntity);
         }
 
 
-        public PagedListDTO<OrderDTO> GetOrders(BaseCriteriaDTO criteria)
+        public Task<PagedListDTO<OrderDTO>> GetOrders(BaseCriteriaDTO criteria)
         {
             //PageSize
             int pageSize = Convert.ToInt32(ConfigurationManager.AppSettings["pageSize"].ToString());
@@ -58,23 +58,27 @@ namespace OrdersManager.Services
             //filter (expression in DB)
             Expression<Func<Order, bool>> filterExpression = x => x.Id  != "0";
 
+            //Azure cosmos db not support method toString, and we use the next Workarround
+            int filterAmount = 0;
+            int.TryParse(criteria.Filter, out filterAmount);
+           
             if (!string.IsNullOrWhiteSpace(criteria.Filter))
 
                 filterExpression = filterExpression.Join(
                          x =>
-                         x.OrderCustomer.ContactName.ToUpper().Contains(criteria.Filter.ToUpper()) ||
+                        (x.OrderCustomer != null && x.OrderCustomer.ContactName.ToUpper().Contains(criteria.Filter.ToUpper())) ||
                          x.ShipAdress.ToUpper().Contains(criteria.Filter.ToUpper())
                         || x.ShipCity.ToUpper().Contains(criteria.Filter.ToUpper())
                         || x.ShipCountry.ToUpper().Contains(criteria.Filter.ToUpper())
                         || x.ShipPostalCode.ToUpper().Contains(criteria.Filter.ToUpper())
-                        || x.TotalAmount.ToString().Contains(criteria.Filter.ToString())
+                        || x.TotalAmount == filterAmount
                         );
 
             //order by
             Expression<Func<Order, object>>[] orderByExpressions = this.GetOrderByExpressions_Orders(criteria.OrderBy);
 
-           
-            Tuple<IQueryable<Order>,int> q = repositoryOrders.GetAllAsync(criteria.PageNumber,
+
+            Tuple<List<Order>, int> q = repositoryOrders.GetAllAsync(criteria.PageNumber,
                 pageSize, filterExpression, criteria.OrderAsc, orderByExpressions).Result;
 
             //get total entities
@@ -87,7 +91,7 @@ namespace OrdersManager.Services
                 Id = Convert.ToInt32(m.Id),
                 Created_At = m.Created_At,
                 //OrderCustomer = m.OrderCustomer,
-                Details = m.OrdersDetails.Select(a => new OrderDetailDTO { Id = Convert.ToInt32(a.OrderDetailId), OrderId = Convert.ToInt32(m.Id), Discount = a.Discount, ProductId = a.ProductId, ProductName = a.ProductSold.Name, Quantity = a.Quantity }).ToList(),
+                Details = m.OrdersDetails.Where(x=> x != null).Select(a => new OrderDetailDTO { Id = Convert.ToInt32(a.OrderDetailId), OrderId = Convert.ToInt32(m.Id), Discount = a.Discount, ProductId = a.ProductId, ProductName = a.ProductSold.Name, Quantity = a.Quantity }).ToList(),
                 shipAdress = m.ShipAdress,
                 shipCity = m.ShipCity,
                 shipCountry = m.ShipCountry,
@@ -95,7 +99,10 @@ namespace OrdersManager.Services
                 TotalAmount = m.TotalAmount
             }).ToList();
 
-            return new PagedListDTO<OrderDTO>(totalItems, pageSize, items, criteria.PageNumber);
+
+            var res = new PagedListDTO<OrderDTO>(totalItems, pageSize, items, criteria.PageNumber);
+                
+            return Task.FromResult(res);
         }
 
 

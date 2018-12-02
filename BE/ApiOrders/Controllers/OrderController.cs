@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 
 namespace OrdersManager.Api.Controllers
 {
-    [Authorize]
     [RoutePrefix("api")]
     public class OrderController : ApiController
     {
@@ -34,11 +34,11 @@ namespace OrdersManager.Api.Controllers
         /// <param name="pageSize">Size of the page.</param>
         /// <returns></returns>     
         [Route("Order/PostGetOrders")]
-        public IHttpActionResult PostGetOrders([FromBody]BaseCriteriaDTO criteria)
+        public async Task<IHttpActionResult> PostGetOrders([FromBody]BaseCriteriaDTO criteria)
         {
             if (criteria == null)
                 return BadRequest();
-            PagedListDTO<OrderDTO> result = orderService.GetOrders(criteria);
+            PagedListDTO<OrderDTO> result = await orderService.GetOrders(criteria);
 
             return Ok(result);
         }
@@ -47,12 +47,12 @@ namespace OrdersManager.Api.Controllers
 
 
         [Route("Order/PostEditOrderDetail")]
-        public IHttpActionResult PostEditOrder([FromBody]OrderDetailDTO orderDetailDTO)
+        public async Task<IHttpActionResult> PostEditOrder([FromBody]OrderDetailDTO orderDetailDTO)
         {
             if (orderDetailDTO == null)
                 return BadRequest();
 
-            orderService.EditOrderDetail(orderDetailDTO);
+            await orderService.EditOrderDetail(orderDetailDTO);
 
             return Ok();
         }

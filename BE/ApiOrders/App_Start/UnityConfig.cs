@@ -50,9 +50,16 @@ namespace OrdersManager.Api
             var locator = new UnityServiceLocator(container);
             ServiceLocator.SetLocatorProvider(() => locator);
 
+
+
+            container.RegisterType<IDocumentDBConnection, DocumentDBConnection>();
+
             container.RegisterType<ICloudServices, AzureService>();
                      
-            container.RegisterType<IOrderService, OrderService>();           
+            container.RegisterType<IOrderService, OrderService>();
+
+            container.RegisterType(typeof(IDocumentDbRepository<>), typeof(DocumentDbRepository<>));
+
 
             GlobalConfiguration.Configuration.DependencyResolver = new Unity.AspNet.WebApi.UnityDependencyResolver(container);
         }

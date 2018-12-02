@@ -22,21 +22,14 @@ namespace OrdersManager.Services.Interfaces
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        PagedListDTO<OrderDTO> GetOrders(BaseCriteriaDTO criteria);
-
-        /// <summary>
-        /// Get lit OrdersDetails
-        /// </summary>
-        /// <param name="criteria"></param>
-        /// <returns></returns>
-        //PagedListDTO<OrderDetailDTO> GetOrdersDetails(BaseCriteriaDTO criteria);
+       Task<PagedListDTO<OrderDTO>> GetOrders(BaseCriteriaDTO criteria);
 
 
         /// <summary>
         /// Edit orders
         /// </summary>
         /// <param name="orderEntity"></param>
-       void EditOrderDetail(OrderDetailDTO orderDetailEntity);
+        Task EditOrderDetail(OrderDetailDTO orderDetailEntity);
 
      
 

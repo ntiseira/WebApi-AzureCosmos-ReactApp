@@ -18,7 +18,7 @@ namespace OrdersManager.Cloud.Interfaces
 
          Task<List<T>> ExecuteSimpleQuery(string databaseName, string collectionName, Expression<Func<T, bool>> expression);
 
-         Task<Tuple<IQueryable<T>, int>> GetAllAsync(int pageNumber, int pageSize, Expression<Func<T, bool>> filter = null, bool orderAsc = false,
+        Task<Tuple<List<T>, int>> GetAllAsync(int pageNumber, int pageSize, Expression<Func<T, bool>> filter = null, bool orderAsc = false,
             params Expression<Func<T, object>>[] orderByExpressions);
 
     }

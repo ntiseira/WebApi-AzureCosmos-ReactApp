@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
-import { adalApiFetch } from './AdalReact/adalConfig';
+import axios from 'axios';
 
  
 
@@ -17,46 +17,45 @@ export const requestData = (page,  sorted, filtered) => {
       OrderBy:  (sorted.length > 0 ) ? sorted[0].id : ""
        };
      
-    const headersToSend = {
-        "Accept": "application/json",
-    "Content-Type": "application/json"   
-    };
+   
 
-    const url = 'http://localhost:51590/api/Order/PostGetOrders';
+    axios({
+      method: 'post',
+      url: 'http://localhost:51590/api/Order/PostGetOrders',
+      data: requestCriteria
+    })
+    .then(function (response){     
+      resolve(response);
+      })        
+    .catch(function (error) {
+      console.log(error); //TODO: Revisar el manejo de excepciones
+    });
 
-    adalApiFetch(fetch, url, {method: 'POST',  body: JSON.stringify(requestCriteria) , headers: headersToSend,   cache: 'no-cache'})
-      .then(response => response.json())
-      .then((response) => {
-
-        resolve(response);   
-      })
-      .catch((error) => {
-
-        console.error(error);
-      }) 
     });
 };
 
-export const UpdateDataDetails = (detail) => {
+export const UpdateDataDetails = (details) => {
   return new Promise((resolve, reject) => {
  
-    const headersToSend = {
-      "Accept": "application/json",
-  "Content-Type": "application/json"   
-  };
+  /*  var requestPost = {
+      Id: idOrder,
+      Details: details
+       };
+*/
+  axios({
+    method: 'post',
+    url: 'http://localhost:51590/api/Order/PostEditOrderDetail',
+    data: details
+  })
+  .then(function (response){     
+    resolve(response);
+    })        
+  .catch(function (error) {
+    console.log(error); //TODO: Revisar el manejo de excepciones
+  });
 
-  const url = 'http://localhost:51590/api/Order/PostEditOrderDetail';
 
-  adalApiFetch(fetch, url, {method: 'POST',  body: JSON.stringify(detail) , headers: headersToSend,   cache: 'no-cache'})
-    .then(response => response.json())
-    .then((response) => {
 
-      resolve(response);   
-    })
-    .catch((error) => {
-
-      console.error(error);
-    }) 
   });
 };
 

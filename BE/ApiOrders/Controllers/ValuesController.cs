@@ -7,8 +7,7 @@ using System.Web.Http;
 
 namespace OrdersManager.Api.Controllers
 {
-    //[Authorize]
-
+   
     public class ValuesController : ApiController
     {
         // GET api/values

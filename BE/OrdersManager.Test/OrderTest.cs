@@ -32,37 +32,16 @@ namespace OrdersManager.Test
                 PageNumber = 1
             };
 
-            var postResult = orderController.PostGetOrders(criteria);
+            var postResult = orderController.PostGetOrders(criteria).Result;
 
-            var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
+            var listOrders =  postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
 
 
             Assert.IsTrue(listOrders.Content.TotalItems > 0);
         }
 
-        private Expression<Func<OrderDetail, object>>[] GetOrderDetailsByExpressions_Orders(string orderBy)
-        {
-            var result = new List<Expression<Func<OrderDetail, object>>>();
-
-            switch (orderBy)
-            {
-                case nameof(OrderDetailDTO.Id):
-                result.Add((OrderDetail x) => x.OrderDetailId); break;
-                case nameof(OrderDetailDTO.ProductName):
-                result.Add((OrderDetail x) => x.ProductSold.Name); break;
-                case nameof(OrderDetailDTO.Quantity):
-                result.Add((OrderDetail x) => x.Quantity); break;
-                case nameof(OrderDetailDTO.Discount):
-                result.Add((OrderDetail x) => x.Discount);
-                break;//this is considered by default
-            }
-
-            result.Add((OrderDetail x) => x.OrderId);
-
-            return result.ToArray();
-        }
-
         [Test]
+        [Ignore ("This method is used to generate mock data")]
         public void DoMockDataInAzureCosmos()
         {
             var repo = UnityConfig.Resolve<IDocumentDbRepository<Order>>();
@@ -125,17 +104,16 @@ namespace OrdersManager.Test
 
             BaseCriteriaDTO criteria = new BaseCriteriaDTO
             {
-                Filter = "Buenos Aires",
+                Filter = "testAddress",
                 OrderAsc = true,
                 OrderBy = "",
                 PageNumber = 1
             };
 
-            var postResult = orderController.PostGetOrders(criteria);
+            var postResult = orderController.PostGetOrders(criteria).Result;
 
             var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
-
-
+            
             Assert.IsTrue(listOrders.Content.TotalItems > 0);
         }
 
@@ -154,7 +132,7 @@ namespace OrdersManager.Test
                 PageNumber = 1
             };
 
-            var postResult = orderController.PostGetOrders(criteria);
+            var postResult = orderController.PostGetOrders(criteria).Result;
 
             var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
 
@@ -179,7 +157,7 @@ namespace OrdersManager.Test
                 PageNumber = 1
             };
 
-            var postResult = orderController.PostGetOrders(criteria);
+            var postResult = orderController.PostGetOrders(criteria).Result;
 
             var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
 
@@ -190,17 +168,15 @@ namespace OrdersManager.Test
             entity.Details[0].Quantity = 10000;
             entity.Details[0].Discount = 10000;
 
-            // orderController.PostEditOrder(entity);
+           var result = orderController.PostEditOrder(entity.Details[0]).Result;
 
-         
-
-            //  unitOfWorkSession.Commit();
-            //Assert.IsTrue(unitOfWorkSession.Commit()));
+            var posRes = result as OkResult;
+            Assert.IsNotNull(posRes);
         }
 
 
 
-      
+
 
 
 
