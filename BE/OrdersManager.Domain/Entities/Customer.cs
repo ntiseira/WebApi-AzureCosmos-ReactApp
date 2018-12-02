@@ -8,11 +8,14 @@ using System.Threading.Tasks;
 
 namespace OrdersManager.Domain.Entities
 {
-  public  class Customer : BaseEntity
+  public  class Customer
+        //: BaseEntity
     {
-        [JsonProperty(PropertyName = "ContactName")]
         public string ContactName { get; set; }
 
-
+        //public override string ToString()
+        //{
+        //    return JsonConvert.SerializeObject(this);
+        //}
     }
 }

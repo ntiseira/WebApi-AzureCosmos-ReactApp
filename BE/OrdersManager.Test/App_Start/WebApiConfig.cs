@@ -1,5 +1,4 @@
-﻿using OrdersManager.Api.Filters;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,8 +29,7 @@ namespace OrdersManager.Test.App_Start
                 defaults: new { id = RouteParameter.Optional }
             );
 
-            // add UoW action filter globally
-            config.Filters.Add(new UnitOfWorkActionFilter());
+          
         }
     }
 }

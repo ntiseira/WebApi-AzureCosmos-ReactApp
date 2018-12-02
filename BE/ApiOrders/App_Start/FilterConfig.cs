@@ -1,5 +1,4 @@
-﻿using OrdersManager.Api.Filters;
-using System.Web;
+﻿using System.Web;
 using System.Web.Mvc;
 
 namespace ApiOrders

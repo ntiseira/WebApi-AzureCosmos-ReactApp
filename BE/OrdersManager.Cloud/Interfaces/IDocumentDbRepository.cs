@@ -12,7 +12,7 @@ namespace OrdersManager.Cloud.Interfaces
     {
         Task<T> GetItemAsync(string id);
 
-         Task<Document>  CreateItemAsync(T item);
+         Task<Document>  CreateItemAsync(string id, T item);
 
         Task<Document> UpdateItemAsync(string id, T item);
 

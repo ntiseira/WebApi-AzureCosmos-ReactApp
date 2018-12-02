@@ -8,7 +8,6 @@ using OrdersManager.Api.Controllers;
 using OrdersManager.Cloud;
 using OrdersManager.Cloud.Interfaces;
 using OrdersManager.Cloud.Services;
-using OrdersManager.Data.UnitOfWork;
 using OrdersManager.Domain.DTOs;
 using OrdersManager.Domain.Entities;
 using OrdersManager.Services;
@@ -19,37 +18,26 @@ namespace OrdersManager.Test
     public class OrderTest
     {
         [Test]
-        public async Task GetOrdersWithoutFilter()
+        public void GetOrdersWithoutFilter()
         {
-            var repo = UnityConfig.Resolve<IDocumentDbRepository<EntityCloud>>();
+            var repo = UnityConfig.Resolve<IDocumentDbRepository<Order>>();
 
-            //var azureClient = new AzureService(conn);
+            var orderController = UnityConfig.Resolve<OrderController>();
 
+            BaseCriteriaDTO criteria = new BaseCriteriaDTO
+            {
+                Filter = "",
+                OrderAsc = true,
+                OrderBy = "",
+                PageNumber = 1
+            };
 
-            var orderTest = new EntityCloud { Id = "1"  };
+            var postResult = orderController.PostGetOrders(criteria);
 
-            repo.CreateItemAsync(orderTest).Wait();
-
-
-
-           //await azureClient.CreateOrderQueryAzureCosmos(orderTest);
-
-           // var orderController = UnityConfig.Resolve<OrderController>();
-
-           // BaseCriteriaDTO criteria = new BaseCriteriaDTO
-           // {
-           //     Filter = "",
-           //     OrderAsc = true,
-           //     OrderBy = "",
-           //     PageNumber = 1
-           // };
-
-           // var postResult = orderController.PostGetOrders(criteria);
-
-           // var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
+            var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
 
 
-           // Assert.IsTrue(listOrders.Content.TotalItems > 0);
+            Assert.IsTrue(listOrders.Content.TotalItems > 0);
         }
 
         private Expression<Func<OrderDetail, object>>[] GetOrderDetailsByExpressions_Orders(string orderBy)
@@ -59,7 +47,7 @@ namespace OrdersManager.Test
             switch (orderBy)
             {
                 case nameof(OrderDetailDTO.Id):
-                result.Add((OrderDetail x) => x.Id); break;
+                result.Add((OrderDetail x) => x.OrderDetailId); break;
                 case nameof(OrderDetailDTO.ProductName):
                 result.Add((OrderDetail x) => x.ProductSold.Name); break;
                 case nameof(OrderDetailDTO.Quantity):
@@ -75,48 +63,57 @@ namespace OrdersManager.Test
         }
 
         [Test]
-        public void CreateDocumentAzureCosmos()
+        public void DoMockDataInAzureCosmos()
         {
-            var repo = UnityConfig.Resolve<IDocumentDbRepository<EntityCloud>>();
-
-            //var azureClient = new AzureService(conn);
+            var repo = UnityConfig.Resolve<IDocumentDbRepository<Order>>();
 
 
-            var orderTest = new EntityCloud { Id = "8" };
+            for (int i = 1; i < 60; i++)
+            {
+                Order orderMock = new Order();
+
+                orderMock.Id = i.ToString();
+                orderMock.Created_At = DateTime.Now;
+                orderMock.CustomerId = 1;
+                orderMock.OrderCustomer = new Customer 
+                {
+                    ContactName = "Pedro"
+                };
+                orderMock.ShipAdress = "testAddress";
+                orderMock.ShipCity = "testShipCity";
+                orderMock.ShipCity = "testShipCity";
+                orderMock.ShipCountry = "testShipCountry";
+                orderMock.ShipPostalCode = "testShipPostalCode";
+                orderMock.TotalAmount = 4;
+                orderMock.OrdersDetails = new OrderDetail[10];
+
+                for (int j = 0; j < 6; j++)
+                {
+                    orderMock.OrdersDetails[j] =
+                        new OrderDetail
+                        {
+                            OrderDetailId = j + 1,
+                            Discount = 10,
+                            OrderId = i,
+                            ProductId = 1,
+                            ProductSold = new Product
+                            {                               
+                                Name = "Mesas",
+                                UnitInStock = 10,
+                                Unitprice = 1000
+                            },
+                            Quantity = 10
+
+                        };
+
+                }
+ 
+                var resu = repo.CreateItemAsync(orderMock.Id, orderMock).Result;
+
+                Assert.AreEqual(resu.Id, orderMock.Id);
+            }
 
 
-            Expression<Func<EntityCloud, bool>> expression = x => x.Id == orderTest.Id;
-            
-            
-
-
-            var result = repo.ExecuteSimpleQuery("azuredbtestorders3", "test3", null).Result;
-
-            List<EntityCloud> orders = new List<EntityCloud>();
-            orders = result;
-
-            var resu =  repo.CreateItemAsync(orderTest).Result;
-
-            
-
-            //await azureClient.CreateOrderQueryAzureCosmos(orderTest);
-
-            // var orderController = UnityConfig.Resolve<OrderController>();
-
-            // BaseCriteriaDTO criteria = new BaseCriteriaDTO
-            // {
-            //     Filter = "",
-            //     OrderAsc = true,
-            //     OrderBy = "",
-            //     PageNumber = 1
-            // };
-
-            // var postResult = orderController.PostGetOrders(criteria);
-
-            // var listOrders = postResult as OkNegotiatedContentResult<PagedListDTO<OrderDTO>>;
-
-
-             Assert.AreEqual(resu.Id , orderTest.Id);
         }
 
 
@@ -195,7 +192,7 @@ namespace OrdersManager.Test
 
             // orderController.PostEditOrder(entity);
 
-            UnityConfig.Resolve<IUnitOfWork>().Commit();
+         
 
             //  unitOfWorkSession.Commit();
             //Assert.IsTrue(unitOfWorkSession.Commit()));

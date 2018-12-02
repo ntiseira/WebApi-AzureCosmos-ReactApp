@@ -2,8 +2,6 @@ using CommonServiceLocator;
 using OrdersManager.Cloud;
 using OrdersManager.Cloud.Interfaces;
 using OrdersManager.Cloud.Services;
-using OrdersManager.Data.Repository.Base;
-using OrdersManager.Data.UnitOfWork;
 using OrdersManager.Services;
 using OrdersManager.Services.Interfaces;
 using System;
@@ -52,17 +50,8 @@ namespace OrdersManager.Api
             var locator = new UnityServiceLocator(container);
             ServiceLocator.SetLocatorProvider(() => locator);
 
-            container.RegisterType<IContextFactory, ContextFactory>(new PerRequestLifetimeManager());
-
-            container.RegisterType<IUnitOfWork, UnitOfWork>(new PerRequestLifetimeManager());
-
             container.RegisterType<ICloudServices, AzureService>();
-
-             
-
-            container.RegisterType(typeof(IRepository<>), typeof(Repository<>));
-
-         
+                     
             container.RegisterType<IOrderService, OrderService>();           
 
             GlobalConfiguration.Configuration.DependencyResolver = new Unity.AspNet.WebApi.UnityDependencyResolver(container);

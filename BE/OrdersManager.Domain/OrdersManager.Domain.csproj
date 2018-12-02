@@ -65,10 +65,6 @@
     <Compile Include="DTOs\PagedListDTO.cs" />
     <Compile Include="DTOs\ProductDTO.cs" />
     <Compile Include="Entities\EntityCloud.cs" />
-    <Compile Include="Mapping\CustomerMap.cs" />
-    <Compile Include="Mapping\OrderDetailMap.cs" />
-    <Compile Include="Mapping\OrderMap.cs" />
-    <Compile Include="Mapping\ProductMap.cs" />
     <Compile Include="Entities\Order.cs" />
     <Compile Include="Entities\OrderDetail.cs" />
     <Compile Include="Entities\Product.cs" />

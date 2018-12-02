@@ -48,8 +48,8 @@
     <Reference Include="Microsoft.Data.Services.Client, Version=5.8.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Data.Services.Client.5.8.4\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -82,10 +82,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DocumentDbRepository.cs" />
+    <Compile Include="Helper\ExpressionExtension.cs" />
+    <Compile Include="Repository\DocumentDbRepository.cs" />
     <Compile Include="Interfaces\IDocumentDbRepository.cs" />
     <Compile Include="Services\AzureService.cs" />
-    <Compile Include="DocumentDBConnection.cs" />
+    <Compile Include="Provider\DocumentDBConnection.cs" />
     <Compile Include="Interfaces\ICloudServices.cs" />
     <Compile Include="Interfaces\IDocumentDBConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

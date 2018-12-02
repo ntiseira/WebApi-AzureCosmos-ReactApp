@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace OrdersManager.Domain.Entities
 {
-    public class Product : BaseEntity
+    public class Product 
+        //: BaseEntity
     {
         //[JsonProperty(PropertyName = "Name")]
         public string Name { get; set; }

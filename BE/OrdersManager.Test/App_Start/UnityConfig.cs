@@ -3,8 +3,6 @@ using OrdersManager.Api.Controllers;
 using OrdersManager.Cloud;
 using OrdersManager.Cloud.Interfaces;
 using OrdersManager.Cloud.Services;
-using OrdersManager.Data.Repository.Base;
-using OrdersManager.Data.UnitOfWork;
 using OrdersManager.Services;
 using OrdersManager.Services.Interfaces;
 using System;
@@ -59,12 +57,8 @@ namespace OrdersManager.Test
             var locator = new UnityServiceLocator(container);
             ServiceLocator.SetLocatorProvider(() => locator);
 
-            container.RegisterType<IContextFactory, ContextFactory>(new SingletonLifetimeManager());
-
-            container.RegisterType<IUnitOfWork, UnitOfWork>(new SingletonLifetimeManager());
+            
             container.RegisterType<ICloudServices, AzureService>();
-
-            container.RegisterType(typeof(IRepository<>), typeof(Repository<>));
 
             container.RegisterType<IDocumentDBConnection, DocumentDBConnection>();
 

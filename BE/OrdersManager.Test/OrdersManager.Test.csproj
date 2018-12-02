@@ -178,10 +178,6 @@
       <Project>{34913544-f400-4787-bf97-c96b43799e20}</Project>
       <Name>OrdersManager.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OrdersManager.Data\OrdersManager.Data.csproj">
-      <Project>{1A4E4B17-467F-412C-9359-7F9B639E9D1B}</Project>
-      <Name>OrdersManager.Data</Name>
-    </ProjectReference>
     <ProjectReference Include="..\OrdersManager.Domain\OrdersManager.Domain.csproj">
       <Project>{2CDCBA06-E620-4472-8418-13D082488734}</Project>
       <Name>OrdersManager.Domain</Name>

@@ -8,24 +8,24 @@ using System.Threading.Tasks;
 
 namespace OrdersManager.Domain.Entities
 {
-   public class OrderDetail: BaseEntity
-    {
+   public class OrderDetail
+     {
 
-        //[JsonProperty(PropertyName = "ProductId")]
-
+ 
         public int ProductId { get; set; }
 
+        public int OrderDetailId { get; set; }        
 
-        //[JsonProperty(PropertyName = "OrderId")]
-        public int OrderId { get; set; }
 
-        //[JsonProperty(PropertyName = "Quantity")]
-        public int Quantity { get; set; }
+         public int OrderId { get; set; }
 
-        //[JsonProperty(PropertyName = "Discount")]
-        public int Discount { get; set; }
+         public int Quantity { get; set; }
 
-        //[JsonProperty(PropertyName = "ProductSold")]
-        public Product ProductSold { get; set; }
+         public int Discount { get; set; }
+
+         public Product ProductSold { get; set; }
+
+
+       
     }
 }

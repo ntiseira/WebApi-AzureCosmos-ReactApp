@@ -63,10 +63,6 @@
       <Project>{3C7F6BC3-F1BF-4C15-9C07-37D4D299F0D9}</Project>
       <Name>OrdersManager.Cloud</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OrdersManager.Data\OrdersManager.Data.csproj">
-      <Project>{1A4E4B17-467F-412C-9359-7F9B639E9D1B}</Project>
-      <Name>OrdersManager.Data</Name>
-    </ProjectReference>
     <ProjectReference Include="..\OrdersManager.Domain\OrdersManager.Domain.csproj">
       <Project>{2CDCBA06-E620-4472-8418-13D082488734}</Project>
       <Name>OrdersManager.Domain</Name>

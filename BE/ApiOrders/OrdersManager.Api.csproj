@@ -252,7 +252,6 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OrderController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
-    <Compile Include="Filters\UnitOfWorkActionFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -318,6 +317,7 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Filters\" />
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
@@ -357,10 +357,6 @@
     <ProjectReference Include="..\OrdersManager.Common\OrdersManager.Common.csproj">
       <Project>{34913544-F400-4787-BF97-C96B43799E20}</Project>
       <Name>OrdersManager.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OrdersManager.Data\OrdersManager.Data.csproj">
-      <Project>{1A4E4B17-467F-412C-9359-7F9B639E9D1B}</Project>
-      <Name>OrdersManager.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\OrdersManager.Domain\OrdersManager.Domain.csproj">
       <Project>{2CDCBA06-E620-4472-8418-13D082488734}</Project>

@@ -1,6 +1,5 @@
-﻿using OrdersManager.Cloud.Interfaces;
-using OrdersManager.Data.Helper;
-using OrdersManager.Data.UnitOfWork;
+﻿using OrdersManager.Cloud.Helper;
+using OrdersManager.Cloud.Interfaces;
 using OrdersManager.Domain.DTOs;
 using OrdersManager.Domain.Entities;
 using OrdersManager.Services.Interfaces;
@@ -40,7 +39,7 @@ namespace OrdersManager.Services
            foreach(var item in orderEntity.OrdersDetails)
            {
                 //Ask for id of order detail
-                if (item.Id == orderDetailDto.Id.ToString())
+                if (item.OrderDetailId == orderDetailDto.Id)
                 {
                     item.Quantity = orderDetailDto.Quantity;
                     item.Discount = orderDetailDto.Discount;
@@ -88,7 +87,7 @@ namespace OrdersManager.Services
                 Id = Convert.ToInt32(m.Id),
                 Created_At = m.Created_At,
                 //OrderCustomer = m.OrderCustomer,
-                Details = m.OrdersDetails.Select(a => new OrderDetailDTO { Id = Convert.ToInt32(a.Id), OrderId = Convert.ToInt32(m.Id), Discount = a.Discount, ProductId = a.ProductId, ProductName = a.ProductSold.Name, Quantity = a.Quantity }).ToList(),
+                Details = m.OrdersDetails.Select(a => new OrderDetailDTO { Id = Convert.ToInt32(a.OrderDetailId), OrderId = Convert.ToInt32(m.Id), Discount = a.Discount, ProductId = a.ProductId, ProductName = a.ProductSold.Name, Quantity = a.Quantity }).ToList(),
                 shipAdress = m.ShipAdress,
                 shipCity = m.ShipCity,
                 shipCountry = m.ShipCountry,
@@ -129,8 +128,6 @@ namespace OrdersManager.Services
                 break;//this is considered by default
             }
 
-            result.Add((Order x) => x.Id);
-            result.Add((Order x) => x.Created_At);
             return result.ToArray();
         }
 
@@ -142,7 +139,7 @@ namespace OrdersManager.Services
             switch (orderBy)
             {
                 case nameof(OrderDetailDTO.Id):
-                result.Add((OrderDetail x) => x.Id); break;
+                result.Add((OrderDetail x) => x.OrderDetailId); break;
                 case nameof(OrderDetailDTO.ProductName):
                 result.Add((OrderDetail x) => x.ProductSold.Name); break;
                 case nameof(OrderDetailDTO.Quantity):

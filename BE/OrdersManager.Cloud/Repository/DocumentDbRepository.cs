@@ -20,9 +20,9 @@ namespace OrdersManager.Cloud
     {
         private static readonly string DatabaseId = ConfigurationManager.AppSettings["database"];
         private static readonly string CollectionId = ConfigurationManager.AppSettings["collection"];
-        private  DocumentClient client;
+        private  static DocumentClient client;
 
-        public  DocumentClient GetClient()
+        public static DocumentClient GetClient()
         {
             if (client == null)
                 Initialize();
@@ -67,13 +67,13 @@ namespace OrdersManager.Cloud
             return results;
         }
 
-        public async Task<Document> CreateItemAsync(T item)
+        public async Task<Document> CreateItemAsync(string id,T item)
         { 
             Document docResponse = new Document();
- 
+           
             try
             {
-                docResponse =  await GetClient().ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, item.ToString()));
+                docResponse = await GetClient().ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id));
             }
             catch (DocumentClientException de)
             {
@@ -86,17 +86,24 @@ namespace OrdersManager.Cloud
                     throw;
                 }
             }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
 
-            return docResponse;
+                return docResponse;
         }
 
 
-        public IQueryable<T> GetAll()
+        public IQueryable<T> GetAll( )
         {
+           
             var query = GetClient().CreateDocumentQuery<T>(
                   UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions()
                   {
-                      EnableCrossPartitionQuery = true
+                      EnableCrossPartitionQuery = true,
+                      MaxItemCount = Convert.ToInt32(ConfigurationManager.AppSettings["pageSize"].ToString())
+
                   });
 
 
@@ -124,26 +131,26 @@ namespace OrdersManager.Cloud
 
             //Add order by expressions
             foreach (var itemOrder in orderByExpressions)
-            {
-               
+            {               
                 q = ObjectSort(q, itemOrder, sortOrder);
             }
 
-            q = q.Skip(pageSize * (pageNumber - 1)).Take(pageSize);
 
+           // q.Skip(pageSize * (pageNumber - 1)).Take(pageSize);
 
-            var query = GetClient().CreateDocumentQuery<T>(
-                  UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions()
-                  {
-                      MaxItemCount = pageSize,
-                      EnableCrossPartitionQuery = true
-                  }).AsDocumentQuery();
-
+            //q = q.Take(pageSize);
 
             var results = new List<T>();
+          
+            var query = q.AsDocumentQuery();
+            int count = pageNumber - 1;
+
             while (query.HasMoreResults)
             {
-                results.AddRange(await query.ExecuteNextAsync<T>());
+                if (count == 0)
+                {
+                    results.AddRange(await query.ExecuteNextAsync<T>());
+                }
             }
 
             //Create response
@@ -202,14 +209,14 @@ namespace OrdersManager.Cloud
             await client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id));
         }
 
-        public void Initialize()
+        public static void Initialize()
         {
             client = new DocumentClient(new Uri(ConfigurationManager.AppSettings["endpoint"]), ConfigurationManager.AppSettings["authKey"]);
-        //  CreateDatabaseIfNotExistsAsync().Wait();
-        //   CreateCollectionIfNotExistsAsync().Wait();
+            CreateDatabaseIfNotExistsAsync().Wait();
+            CreateCollectionIfNotExistsAsync().Wait();
         }
 
-        private   async Task CreateDatabaseIfNotExistsAsync()
+        private  static async Task CreateDatabaseIfNotExistsAsync()
         {
             try
             {
@@ -228,7 +235,7 @@ namespace OrdersManager.Cloud
             }
         }
 
-        private   async Task CreateCollectionIfNotExistsAsync()
+        private static async Task CreateCollectionIfNotExistsAsync()
         {
             try
             {
