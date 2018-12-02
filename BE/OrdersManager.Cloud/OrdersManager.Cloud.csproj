@@ -85,10 +85,6 @@
     <Compile Include="Helper\ExpressionExtension.cs" />
     <Compile Include="Repository\DocumentDbRepository.cs" />
     <Compile Include="Interfaces\IDocumentDbRepository.cs" />
-    <Compile Include="Services\AzureService.cs" />
-    <Compile Include="Provider\DocumentDBConnection.cs" />
-    <Compile Include="Interfaces\ICloudServices.cs" />
-    <Compile Include="Interfaces\IDocumentDBConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

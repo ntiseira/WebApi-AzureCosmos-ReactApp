@@ -2,7 +2,6 @@ using CommonServiceLocator;
 using OrdersManager.Api.Controllers;
 using OrdersManager.Cloud;
 using OrdersManager.Cloud.Interfaces;
-using OrdersManager.Cloud.Services;
 using OrdersManager.Services;
 using OrdersManager.Services.Interfaces;
 using System;
@@ -56,11 +55,6 @@ namespace OrdersManager.Test
         {
             var locator = new UnityServiceLocator(container);
             ServiceLocator.SetLocatorProvider(() => locator);
-
-            
-            container.RegisterType<ICloudServices, AzureService>();
-
-            container.RegisterType<IDocumentDBConnection, DocumentDBConnection>();
 
             container.RegisterType<IOrderService, OrderService>();
 

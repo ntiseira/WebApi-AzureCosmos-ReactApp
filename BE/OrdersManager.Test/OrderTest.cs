@@ -7,7 +7,6 @@ using NUnit.Framework;
 using OrdersManager.Api.Controllers;
 using OrdersManager.Cloud;
 using OrdersManager.Cloud.Interfaces;
-using OrdersManager.Cloud.Services;
 using OrdersManager.Domain.DTOs;
 using OrdersManager.Domain.Entities;
 using OrdersManager.Services;
@@ -168,7 +167,7 @@ namespace OrdersManager.Test
             entity.Details[0].Quantity = 10000;
             entity.Details[0].Discount = 10000;
 
-           var result = orderController.PostEditOrder(entity.Details[0]).Result;
+           var result = orderController.PostEditOrder(entity).Result;
 
             var posRes = result as OkResult;
             Assert.IsNotNull(posRes);

@@ -57,6 +57,11 @@ namespace OrdersManager.Cloud
                     throw;
                 }
             }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
         }
 
         public   async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
@@ -121,14 +126,12 @@ namespace OrdersManager.Cloud
 
     
 
-        public async Task<Tuple<List<T>,int>> GetAllAsync(int pageNumber, int pageSize, Expression<Func<T, bool>> filter = null, bool orderAsc = false, 
+        public  Tuple<List<T>,int> GetAllAsync(int pageNumber, int pageSize, Expression<Func<T, bool>> filter = null, bool orderAsc = false, 
             params Expression<Func<T, object>>[] orderByExpressions)
         {
             //Create response
             Tuple<List<T>, int> res;
-
-            try
-            {
+ 
                 IQueryable<T> q = GetAll();
 
                 //Add filters
@@ -137,18 +140,7 @@ namespace OrdersManager.Cloud
 
                 //Get count
                 int totalItems = q.Count();
-
-                //Add order by desc or asc
-                SortOrder sortOrder = SortOrder.Descending;
-                if (orderAsc)
-                    sortOrder = SortOrder.Ascending;
-
-                //Add order by expressions
-                foreach (var itemOrder in orderByExpressions)
-                {
-                    q = ObjectSort(q, itemOrder, sortOrder);
-                }
-
+                
                 var results = new List<T>();
 
                 var query = q.AsDocumentQuery();
@@ -160,24 +152,20 @@ namespace OrdersManager.Cloud
 
                     if (count == 0)
                     {
-                        results.AddRange(await query.ExecuteNextAsync<T>());
+                        results.AddRange(query.ExecuteNextAsync<T>().Result);
                         flag = true;
                     }
                     else
                     {
-                        await query.ExecuteNextAsync<T>();
+                       var result = query.ExecuteNextAsync<T>().Result;
                     }
                     count--;
 
                 }
 
                 //Create response
-                res = new Tuple<List<T>, int>(results, totalItems);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+                 res = new Tuple<List<T>, int>(results, totalItems);
+            
 
             return res;
         }

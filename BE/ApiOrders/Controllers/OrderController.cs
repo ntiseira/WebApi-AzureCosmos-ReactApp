@@ -47,12 +47,12 @@ namespace OrdersManager.Api.Controllers
 
 
         [Route("Order/PostEditOrderDetail")]
-        public async Task<IHttpActionResult> PostEditOrder([FromBody]OrderDetailDTO orderDetailDTO)
+        public async Task<IHttpActionResult> PostEditOrder([FromBody]OrderDTO orderDTO)
         {
-            if (orderDetailDTO == null)
+            if (orderDTO == null)
                 return BadRequest();
 
-            await orderService.EditOrderDetail(orderDetailDTO);
+            await orderService.EditOrderDetail(orderDTO);
 
             return Ok();
         }

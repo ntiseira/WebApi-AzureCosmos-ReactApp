@@ -15,36 +15,36 @@ namespace OrdersManager.Services
     public class OrderService : IOrderService
     {
 
-        private readonly ICloudServices cloudServices;
         private IDocumentDbRepository<Order> repositoryOrders;
 
         /// <inheritdoc />
         public OrderService(
-              ICloudServices cloudServices
-            ,IDocumentDbRepository<Order> repositoryOrders
+            IDocumentDbRepository<Order> repositoryOrders
             )
         {
-            this.cloudServices = cloudServices;
             this.repositoryOrders = repositoryOrders;
 
         }
                 
 
-        public async Task EditOrderDetail(OrderDetailDTO orderDetailDto)
+        public async Task EditOrderDetail(OrderDTO orderDto)
         {
-            //Get document
-            var orderEntity = repositoryOrders.GetItemAsync(orderDetailDto.OrderId.ToString()).Result;
 
-            //Modify properties of order details
-           foreach(var item in orderEntity.OrdersDetails)
-           {                
-                //Ask for id of order detail
-                if (item!= null && item.OrderDetailId == orderDetailDto.Id)
-                {
-                    item.Quantity = orderDetailDto.Quantity;
-                    item.Discount = orderDetailDto.Discount;
-                }
-           }
+            Order orderEntity = new Order
+            {
+
+                Id = orderDto.Id.ToString(),
+                Created_At = orderDto.Created_At,
+                //CustomerId = orderDto.OrderCustomer.Id,
+                OrderCustomer = orderDto.OrderCustomer,
+                OrdersDetails = orderDto.Details.Select(m => new OrderDetail { Discount = m.Discount, OrderDetailId = m.Id, OrderId = m.OrderId, ProductId = m.ProductId, Quantity = m.Quantity }).ToArray(),
+                ShipAdress = orderDto.shipAdress,
+                ShipCity = orderDto.shipCity,
+                ShipCountry = orderDto.shipCountry,
+                ShipPostalCode = orderDto.shipPostalCode,
+                TotalAmount = orderDto.TotalAmount
+
+            };        
            
             await repositoryOrders.UpdateItemAsync(orderEntity.Id, orderEntity);
         }
@@ -79,7 +79,7 @@ namespace OrdersManager.Services
 
 
             Tuple<List<Order>, int> q = repositoryOrders.GetAllAsync(criteria.PageNumber,
-                pageSize, filterExpression, criteria.OrderAsc, orderByExpressions).Result;
+                pageSize, filterExpression, criteria.OrderAsc, orderByExpressions);
 
             //get total entities
             int totalItems = q.Item2;
@@ -91,7 +91,8 @@ namespace OrdersManager.Services
                 Id = Convert.ToInt32(m.Id),
                 Created_At = m.Created_At,
                 //OrderCustomer = m.OrderCustomer,
-                Details = m.OrdersDetails.Where(x=> x != null).Select(a => new OrderDetailDTO { Id = Convert.ToInt32(a.OrderDetailId), OrderId = Convert.ToInt32(m.Id), Discount = a.Discount, ProductId = a.ProductId, ProductName = a.ProductSold.Name, Quantity = a.Quantity }).ToList(),
+                Details = m.OrdersDetails.Where(x => x != null).Select(a => new OrderDetailDTO
+                { Id = Convert.ToInt32(a.OrderDetailId), OrderId = Convert.ToInt32(m.Id), Discount = a.Discount, ProductId = a.ProductId, ProductName = (a.ProductSold != null ? a.ProductSold.Name : ""), Quantity = a.Quantity }).ToList(),
                 shipAdress = m.ShipAdress,
                 shipCity = m.ShipCity,
                 shipCountry = m.ShipCountry,
@@ -118,7 +119,7 @@ namespace OrdersManager.Services
             switch (orderBy)
             {
                 case nameof(OrderDTO.Id):
-                result.Add((Order x) => x.Id); break;
+                result.Add((Order x) => x.Created_At); break; //Azure cosmos db, not support order by primary key (partition)
               //  case nameof(OrderDTO.OrderCustomer.ContactName):
               //  result.Add((Order x) => x.OrderCustomer.ContactName); break;
                 case nameof(OrderDTO.shipAdress):
@@ -139,27 +140,7 @@ namespace OrdersManager.Services
         }
 
 
-        private Expression<Func<OrderDetail, object>>[] GetOrderDetailsByExpressions_Orders(string orderBy)
-        {
-            var result = new List<Expression<Func<OrderDetail, object>>>();
-
-            switch (orderBy)
-            {
-                case nameof(OrderDetailDTO.Id):
-                result.Add((OrderDetail x) => x.OrderDetailId); break;
-                case nameof(OrderDetailDTO.ProductName):
-                result.Add((OrderDetail x) => x.ProductSold.Name); break;
-                case nameof(OrderDetailDTO.Quantity):
-                result.Add((OrderDetail x) => x.Quantity); break;
-                case nameof(OrderDetailDTO.Discount):
-                result.Add((OrderDetail x) => x.Discount);           
-                break;//this is considered by default
-            }
-
-            result.Add((OrderDetail x) => x.OrderId);
-
-            return result.ToArray();
-        }
+      
 
       
 

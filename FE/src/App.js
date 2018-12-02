@@ -94,8 +94,8 @@ fetchData(state, instance) {
     ).then(response => {
       // Now just get the rows of data to your React Table (and update anything else like total pages or loading)
       this.setState({
-        data: response.CurrentPageItems,
-        pages: response.TotalPages,
+        data: response.data.CurrentPageItems,
+        pages: response.data.TotalPages,
         loading: false
       });
   });
@@ -146,7 +146,7 @@ renderEditable = cellInfo => {
         {
             data.find(a=> a.Id === cellInfo.original.OrderId).Details[cellInfo.index][cellInfo.column.id] = e.target.innerHTML;
 
-            UpdateDataDetails(data.find(a=> a.Id === cellInfo.original.OrderId).Details[cellInfo.index]).then(response => {
+            UpdateDataDetails(data.find(a=> a.Id === cellInfo.original.OrderId)).then(response => {
           
               this.setState({ data });
           });     
@@ -169,29 +169,36 @@ getOrderColumnsTable()
 
   const OrderColumns = [{
     Header: 'Id',
-    accessor: 'Id' // String-based value accessors!
+    accessor: 'Id', // String-based value accessors!
+    sortable: false
   }, {
     Header: 'Customer',
-    accessor: 'OrderCustomer.ContactName'
+    accessor: 'OrderCustomer.ContactName',
+    sortable: false
     //, Cell: props => <span className='number'>{props.value}</span> // Custom cell components!
   }, {
     Header: 'Adress',
-    accessor: 'shipAdress' // String-based value accessors!
+    accessor: 'shipAdress', // String-based value accessors!
+    sortable: false
   }, {
     Header: 'City',
-    accessor: 'shipCity' // String-based value accessors!
+    accessor: 'shipCity', // String-based value accessors!
+    sortable: false
   },
   {
     Header: 'Postal Code',
-    accessor: 'shipPostalCode' // String-based value accessors!
+    accessor: 'shipPostalCode', // String-based value accessors!
+    sortable: false
   }  ,
   {
     Header: 'Country',
-    accessor: 'shipCountry' // String-based value accessors!
+    accessor: 'shipCountry', // String-based value accessors!
+    sortable: false
   }  ,
   {
     Header: 'Total Amount',
-    accessor: 'TotalAmount' // String-based value accessors!
+    accessor: 'TotalAmount', // String-based value accessors!
+    sortable: false
   } 
 ];
 

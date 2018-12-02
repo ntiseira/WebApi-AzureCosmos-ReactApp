@@ -29,7 +29,7 @@ namespace OrdersManager.Services.Interfaces
         /// Edit orders
         /// </summary>
         /// <param name="orderEntity"></param>
-        Task EditOrderDetail(OrderDetailDTO orderDetailEntity);
+        Task EditOrderDetail(OrderDTO orderEntity);
 
      
 
